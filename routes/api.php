@@ -13,9 +13,20 @@ use App\Http\Controllers\AuthController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+// Rutas públicas
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
 
+// Rutas protegidas por Sanctum
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Ejemplo de ruta protegida por rol
+    Route::middleware('role:admin')->get('/admin/dashboard', function () {
+        return response()->json(['message' => 'Bienvenido, Admin']);
+    });
+});

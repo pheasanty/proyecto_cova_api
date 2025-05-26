@@ -8,33 +8,34 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
-    {
-        // Validamos los datos
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|confirmed|min:6'
-        ]);
+public function register(Request $request)
+{
+    // Validación con el campo 'rol'
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'email' => 'required|email|unique:users,email',
+        'password' => 'required|string|confirmed|min:6',
+        'rol' => 'required|in:admin,veterinario,ordeñador' // ✅ nuevo campo
+    ]);
 
-        // Creamos el usuario
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-        ]);
+    // Crear usuario con el rol
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => Hash::make($validated['password']),
+        'rol' => $validated['rol'] // ✅ asigna el rol
+    ]);
 
-        // 🔥 Aquí creamos el token automáticamente
-        $token = $user->createToken('auth_token')->plainTextToken;
+    $token = $user->createToken('auth_token')->plainTextToken;
 
-        // 🔥 Retornamos el usuario + token
-        return response()->json([
-            'message' => 'Usuario creado correctamente',
-            'access_token' => $token,
-            'token_type' => 'Bearer',
-            'user' => $user
-        ], 201);
-    }
+    return response()->json([
+        'message' => 'Usuario creado correctamente',
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => $user
+    ], 201);
+}
+
 
     public function login(Request $request)
     {
