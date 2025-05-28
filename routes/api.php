@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\OrdenoController;
+use App\Http\Controllers\VacaController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,4 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:admin')->get('/admin/dashboard', function () {
         return response()->json(['message' => 'Bienvenido, Admin']);
     });
+
+    Route::post('/ordenos', [OrdenoController::class, 'store']);
+
+    Route::get('/vacas', [VacaController::class, 'index']);
+    Route::post('/vacas', [VacaController::class, 'store']);
 });
