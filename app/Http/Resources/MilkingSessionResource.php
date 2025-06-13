@@ -28,7 +28,7 @@ class MilkingSessionResource extends JsonResource
             'endTime'     => $this->end_time,                // "06:25"
 
             // ----- Métricas -----
-            'yield'       => (float) $this->yield,
+            'milk_yield'       => (float) $this->milk_yield,
             'quality'     => $this->quality,
             'temperature' => (float) $this->temperature,
 

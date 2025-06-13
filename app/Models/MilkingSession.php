@@ -15,7 +15,7 @@ class MilkingSession extends Model
         'date',
         'start_time',
         'end_time',
-        'yield',
+        'milk_yield',
         'quality',
         'notes',
         'temperature',
@@ -23,7 +23,7 @@ class MilkingSession extends Model
 
     protected $casts = [
         'date'        => 'date',
-        'yield'       => 'decimal:2',
+        'milk_yield'       => 'decimal:2',
         'temperature' => 'decimal:1',
     ];
 

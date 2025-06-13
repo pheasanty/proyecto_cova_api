@@ -7,7 +7,8 @@ use App\Models\MilkingSession;
 use App\Http\Requests\StoreMilkingSessionRequest;
 use App\Http\Resources\MilkingSessionResource;
 use Illuminate\Http\Request;
-
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 class MilkingSessionController extends Controller
 {
 // app/Http/Controllers/Api/MilkingSessionController.php
@@ -28,14 +29,43 @@ public function index(Request $request)
 
 
     /** POST /api/milking-sessions */
-    public function store(StoreMilkingSessionRequest $request)
-    {
+
+
+public function store(StoreMilkingSessionRequest $request)
+{
+    $session = DB::transaction(function () use ($request) {
+
+        /** @var \App\Models\MilkingSession $session */
         $session = MilkingSession::create($request->validated());
 
-        return MilkingSessionResource::make($session->load('animal'))
-               ->response()
-               ->setStatusCode(201);
-    }
+        /** @var \App\Models\Animal $animal */
+        $animal = $session->animal;          // relación belongsTo
+
+        // ─────── actualiza métricas del animal ───────
+// app/Http/Controllers/Api/MilkingSessionController.php
+$animal->last_milking = $session->date        // ← instancia Carbon
+    ->copy()                                  // evita mutar $session->date
+    ->setTimeFromTimeString($session->end_time); // «HH:MM»
+
+
+        // suma la producción
+        $animal->total_production += $session->milk_yield;
+
+        // recálculo de average_daily (promedio últimos 30 días)
+        $avg = $animal->milkingSessions()         // relación hasMany
+                      ->whereDate('date', '>=', now()->subDays(30))
+                      ->avg('milk_yield');
+
+        $animal->average_daily = $avg ?? 0;
+        $animal->save();
+
+        return $session->fresh('animal');         // devuelve con datos actualizados
+    });
+
+    return MilkingSessionResource::make($session)
+           ->response()
+           ->setStatusCode(201);
+}
 
     /** GET /api/milking-sessions/{id} */
     public function show(MilkingSession $milkingSession)

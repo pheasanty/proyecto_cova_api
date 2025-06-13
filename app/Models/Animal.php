@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Animal extends Model
 {
     use HasFactory, HasUuids;
@@ -39,5 +41,10 @@ class Animal extends Model
     public function alerts()
     {
         return $this->hasMany(Alert::class);
+    }
+
+    public function milkingSessions(): HasMany
+    {
+        return $this->hasMany(MilkingSession::class);
     }
 }

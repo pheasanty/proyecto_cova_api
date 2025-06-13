@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->date('date');
             $table->time('start_time');
             $table->time('end_time');
-            $table->unsignedDecimal('yield', 6, 2);                          // litros ordeñados
+            $table->unsignedDecimal('milk_yield', 6, 2);                          // litros ordeñados
             $table->enum('quality', ['excellent', 'good', 'fair', 'poor']);
             $table->text('notes')->nullable();
             $table->unsignedDecimal('temperature', 4, 1);                   // °C

@@ -17,7 +17,7 @@ class MilkingSessionFactory extends Factory
             'date'        => $this->faker->dateTimeBetween('-7 days', 'now')->format('Y-m-d'),
             'start_time'  => $this->faker->time('H:i'),
             'end_time'    => $this->faker->time('H:i'),
-            'yield'       => $this->faker->randomFloat(2, 5, 25),   // litros
+            'milk_yield'       => $this->faker->randomFloat(2, 5, 25),   // litros
             'quality'     => $this->faker->randomElement(['excellent', 'good', 'fair', 'poor']),
             'notes'       => $this->faker->boolean(30) ? $this->faker->sentence() : null,
             'temperature' => $this->faker->randomFloat(1, 35, 42), // °C
