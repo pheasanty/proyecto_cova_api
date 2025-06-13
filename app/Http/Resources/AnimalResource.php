@@ -17,6 +17,7 @@ class AnimalResource extends JsonResource
             'tag'             => $this->tag,
             'breed'           => $this->breed,
             'age'             => $this->age,
+            'weight'          => (float) $this->weight, // Asegúrate de que weight sea un float
             'healthStatus'    => $this->health_status,
             'lastMilking'     => $this->last_milking?->toIso8601String(),
             'totalProduction' => (float) $this->total_production,

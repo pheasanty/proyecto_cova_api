@@ -17,6 +17,7 @@ class Animal extends Model
         'tag',
         'breed',
         'age',
+        'weight',
         'health_status',
         'image',
         'last_milking',
@@ -26,6 +27,7 @@ class Animal extends Model
 
     protected $casts = [
         'age'              => 'integer',
+        'weight'           => 'float',
         'last_milking'     => 'datetime',
         'total_production' => 'decimal:2',
         'average_daily'    => 'decimal:2',
