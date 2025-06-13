@@ -10,6 +10,9 @@ use App\Http\Controllers\Api\MilkingSessionController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\UserActivityController;
 use App\Http\Controllers\Api\AlertController;
+use SebastianBergmann\CodeCoverage\Report\Xml\Report;
+use App\Http\Controllers\Api\ReportsController;
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -26,6 +29,7 @@ Route::post('/login', [AuthController::class, 'login']);
     Route::apiResource('animals', AnimalController::class);
     Route::apiResource('milking-sessions', MilkingSessionController::class);
     Route::apiResource('alerts', AlertController::class);
+    Route::get('/reports',ReportsController::class);
 // Rutas protegidas por Sanctum
 // Route::middleware('auth:sanctum')->group(function () {
 //     Route::get('/user', function (Request $request) {

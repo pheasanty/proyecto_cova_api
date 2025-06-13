@@ -29,6 +29,7 @@ class Animal extends Model
         'last_milking'     => 'datetime',
         'total_production' => 'decimal:2',
         'average_daily'    => 'decimal:2',
+        'last_milking' => 'datetime',
     ];
 
     /* ──────────────── Relaciones ──────────────── */
@@ -46,5 +47,11 @@ class Animal extends Model
     public function milkingSessions(): HasMany
     {
         return $this->hasMany(MilkingSession::class);
+    }
+
+        public function latestMilkingSession()
+    {
+        return $this->hasOne(MilkingSession::class)
+                    ->latestOfMany('date');
     }
 }
