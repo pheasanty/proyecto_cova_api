@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Models\Animal;
 use App\Models\MilkingSession;
+use App\Models\Animal;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class MilkingSessionFactory extends Factory
@@ -12,15 +12,18 @@ class MilkingSessionFactory extends Factory
 
     public function definition(): array
     {
+        $start = $this->faker->dateTimeBetween('-7 days', 'now');
+        $end = (clone $start)->modify('+15 minutes');
+
         return [
-            'animal_id'   => Animal::factory(),                 // crea (o usa) un animal
-            'date'        => $this->faker->dateTimeBetween('-7 days', 'now')->format('Y-m-d'),
-            'start_time'  => $this->faker->time('H:i'),
-            'end_time'    => $this->faker->time('H:i'),
-            'milk_yield'       => $this->faker->randomFloat(2, 5, 25),   // litros
-            'quality'     => $this->faker->randomElement(['excellent', 'good', 'fair', 'poor']),
-            'notes'       => $this->faker->boolean(30) ? $this->faker->sentence() : null,
-            'temperature' => $this->faker->randomFloat(1, 35, 42), // °C
+            'animal_id' => Animal::factory(),
+            'date' => $start->format('Y-m-d'),
+            'start_time' => $start->format('H:i:s'),
+            'end_time' => $end->format('H:i:s'),
+            'milk_yield' => $this->faker->randomFloat(2, 5, 25),
+            'quality' => $this->faker->randomElement(['excellent', 'good', 'fair', 'poor']),
+            'notes' => $this->faker->optional()->sentence,
+            'temperature' => $this->faker->randomFloat(1, 35.0, 39.5),
         ];
     }
 }

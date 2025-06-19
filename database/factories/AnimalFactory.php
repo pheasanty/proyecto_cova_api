@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Animal;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 class AnimalFactory extends Factory
 {
@@ -13,15 +12,16 @@ class AnimalFactory extends Factory
     public function definition(): array
     {
         return [
-            'name'             => $this->faker->firstName(),
-            'tag'              => 'A-' . Str::upper(Str::random(4)),
-            'breed'            => $this->faker->randomElement(['Holstein', 'Jersey', 'Guernsey']),
-            'age'              => $this->faker->numberBetween(1, 10),
-            'health_status'    => $this->faker->randomElement(['healthy', 'sick', 'attention']),
-            'last_milking'     => $this->faker->optional()->dateTimeBetween('-1 days', 'now'),
-            'total_production' => 0,
-            'average_daily'    => 0,
-            'image'            => null,
+            'name' => $this->faker->firstName,
+            'tag' => $this->faker->unique()->bothify('TAG-###??'),
+            'breed' => $this->faker->optional()->word,
+            'age' => $this->faker->optional()->numberBetween(1, 15),
+            'weight' => $this->faker->optional()->randomFloat(1, 200, 800),
+            'health_status' => $this->faker->randomElement(['healthy', 'sick', 'attention']),
+            'last_milking' => $this->faker->optional()->dateTimeThisMonth,
+            'total_production' => $this->faker->randomFloat(2, 1000, 10000),
+            'average_daily' => $this->faker->randomFloat(2, 10, 40),
+            'image' => $this->faker->optional()->imageUrl(640, 480, 'animals'),
         ];
     }
 }
