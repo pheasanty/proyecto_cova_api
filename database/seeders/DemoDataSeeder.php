@@ -10,6 +10,8 @@ use App\Models\DailyProduction;
 use App\Models\Alert;
 use Carbon\Carbon;
 
+
+
 class DemoDataSeeder extends Seeder
 {
     public function run(): void
