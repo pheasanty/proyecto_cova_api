@@ -6,15 +6,33 @@ use App\Http\Controllers\Controller;
 use App\Models\MilkingSession;
 use App\Models\Animal;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon; // Asegúrate de importar Carbon para manejar fechas
+use Carbon\Carbon;
 
 class ReportsController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
+        // Validate date filters
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        // Build query with date filters
+        $sessionsQuery = MilkingSession::query();
+        
+        if ($request->filled('start_date')) {
+            $sessionsQuery->where('date', '>=', $validated['start_date']);
+        }
+        
+        if ($request->filled('end_date')) {
+            $sessionsQuery->where('date', '<=', $validated['end_date']);
+        }
+
         /* ─── Producción diaria con distribución de calidad ───────────────────────── */
-        $daily = MilkingSession::query()
+        $daily = (clone $sessionsQuery)
             ->selectRaw('DATE(date) as date')
             ->selectRaw('SUM(milk_yield) as totalYield')
             ->selectRaw('AVG(milk_yield) as averageYield')
@@ -42,7 +60,7 @@ class ReportsController extends Controller
             ]);
 
         /* ─── Estadísticas de calidad agregadas ─────────────────── */
-        $qualityStats = MilkingSession::query()
+        $qualityStats = (clone $sessionsQuery)
             ->selectRaw('quality, COUNT(*) as count')
             ->groupBy('quality')
             ->pluck('count', 'quality');
@@ -70,7 +88,6 @@ class ReportsController extends Controller
                 'healthStatus'    => $a->healthStatus,
                 'averageDaily'    => (float) $a->averageDaily,
                 'totalProduction' => (float) $a->totalProduction,
-                // <-- aquí parseamos con Carbon
                 'lastMilking'     => $a->lastMilking
                     ? Carbon::parse($a->lastMilking)->toIso8601String()
                     : null,
@@ -78,14 +95,15 @@ class ReportsController extends Controller
         });
 
     /* ─── Sesiones detalladas ─── */
-    $sessions = MilkingSession::with('animal')
+    $sessions = (clone $sessionsQuery)
+        ->with('animal')
         ->orderByDesc('date')
         ->get()
         ->map(function(MilkingSession $s) {
             return [
               'date'       => $s->date->toIso8601String(),
-              'startTime'  => $s->start_time,    // asume que en tu tabla es start_time
-              'endTime'    => $s->end_time,      // idem
+              'startTime'  => $s->start_time,
+              'endTime'    => $s->end_time,
               'milk_yield' => (float) $s->milk_yield,
               'quality'    => $s->quality,
               'temperature'=> $s->temperature !== null ? (float)$s->temperature : null,
@@ -103,4 +121,59 @@ class ReportsController extends Controller
       'sessionsTotal'   => count($sessions),
     ]);
 }
+
+    /**
+     * Export report as PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        // TODO: Implement PDF generation using a library like DomPDF or TCPDF
+        // For now, return a message
+        return response()->json([
+            'message' => 'PDF export functionality - To be implemented with DomPDF or TCPDF',
+            'note' => 'Install package: composer require barryvdh/laravel-dompdf'
+        ], 501);
+    }
+
+    /**
+     * Export report as CSV
+     */
+    public function exportCsv(Request $request)
+    {
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $query = MilkingSession::with('animal');
+        
+        if ($request->filled('start_date')) {
+            $query->where('date', '>=', $validated['start_date']);
+        }
+        
+        if ($request->filled('end_date')) {
+            $query->where('date', '<=', $validated['end_date']);
+        }
+
+        $sessions = $query->orderByDesc('date')->get();
+
+        $csv = "Fecha,Animal,Tag,Producción (L),Calidad,Temperatura,Notas\n";
+        
+        foreach ($sessions as $session) {
+            $csv .= sprintf(
+                "%s,%s,%s,%.2f,%s,%.1f,\"%s\"\n",
+                $session->date->format('Y-m-d'),
+                $session->animal->name,
+                $session->animal->tag,
+                $session->milk_yield,
+                $session->quality,
+                $session->temperature ?? 0,
+                str_replace('"', '""', $session->notes ?? '')
+            );
+        }
+
+        return response($csv, 200)
+            ->header('Content-Type', 'text/csv; charset=utf-8')
+            ->header('Content-Disposition', 'attachment; filename="reporte_produccion_' . date('Y-m-d') . '.csv"');
+    }
 }

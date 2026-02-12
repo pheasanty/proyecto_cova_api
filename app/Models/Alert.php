@@ -17,11 +17,13 @@ class Alert extends Model
         'animal_id',
         'date',
         'resolved',
+        'resolved_at',
     ];
 
     protected $casts = [
-        'date'     => 'datetime',
-        'resolved' => 'boolean',
+        'date'        => 'datetime',
+        'resolved'    => 'boolean',
+        'resolved_at' => 'datetime',
     ];
 
     public function animal()
